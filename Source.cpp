@@ -60,7 +60,8 @@ void fill_students()
 	fin.open("input.txt");
 	if (fin.is_open())
 	{
-		for (int i = 0; i <= count_of_students - 1; i++)
+		int i = 0;
+		while(!fin.eof())
 		{
 			temp = 0;
 			getline(fin, gr9894.student[i].name, ' ');
@@ -77,6 +78,7 @@ void fill_students()
 			}
 			GetLocalTime(&gr9894.student[i].sys_t);
 			fin.ignore(1);
+			i++;
 		}
 	}
 	else 
@@ -104,7 +106,8 @@ void print_group_student()
 		<< setw(13) << left << "Rating" << setw(13) << left << "GroupNumber" 
 		<< setw(15) << left << "ListNumber" << setw(10) << left << "Time" << endl;
 
-	for (int i = 0; i <= count_of_students - 1; i++)
+	int i = 0;
+	while (i <= count_of_students - 1)
 	{
 		cout << setfill(' ');
 		cout << setw(3) << left << i + 1 << setw(12) << left << gr9894.student[i].name << " "
@@ -116,6 +119,7 @@ void print_group_student()
 		cout << " " << setw(12) << left << gr9894.student[i].group_number << " "
 			<< setw(10) << left << gr9894.student[i].list_number << " ";
 		printSystemTime(gr9894.student[i].sys_t);
+		i++;
 	}
 	cout << endl;
 }
