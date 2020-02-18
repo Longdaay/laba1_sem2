@@ -1,12 +1,13 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <Windows.h>
-#include <iomanip>
-#include <fstream>
+#include <iostream> // для ввода/вывода
+#include <vector> //для создания массива
+#include <string> // для создания строк
+#include <Windows.h> // для изменения цвета
+#include <iomanip> // для изменения параметров вывода 
+#include <fstream> // для считывания/записи из/в файл(а)
 #include <conio.h> // для меню (считывание символов напрямую из консоли без использования буфера и echo-вывода (getch(void))
 
 using namespace std;
+
 void SetColor(int text, int bg) //Функция смены цвета, взятая из Интернета
 {
 	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -15,11 +16,11 @@ void SetColor(int text, int bg) //Функция смены цвета, взятая из Интернета
 
 const int NotUsed = system("color 70"); // изменения цвета консоли в серый 
 
-int count_of_students = 50;
-int count_of_rates = 8;
-int index = 0;
-int group_count = 0;
-int count_of_players = 30;
+int count_of_students = 50; // количество студентов в "общей" группе
+int count_of_rates = 8; // количество оценок у участника
+int index = 0; 
+int group_count = 0; // количество участников
+int count_of_players = 30; // количество участников в Кубке Первокурсника
 int m_count = 0; // значения для меню - это значение изменяется при нажатии стрелок вверх или вниз
 
 struct Student
@@ -28,7 +29,7 @@ struct Student
 	string surname; //Фамилия
 	string father_name; //Отчество
 	string sex; //Пол
-	int group_number;
+	int group_number; // номер группы
 	int list_number;
 	vector<int> rates{ count_of_rates }; //Оценки
 	string form_edu; //Форма обучения
@@ -39,120 +40,118 @@ struct Student
 
 struct Group
 {
-	int fact_count = 0;
-	int group_number;
-	vector <Student> student{ count_of_students };
+	int fact_count = 0; // фактическое количество участников в группе
+	vector <Student> student{ count_of_students }; // массив студентов 
 } gr9894, gr9893, group_all;
 
-void info_student(Group &group);
+void info_student(Group &group); // прототип вывода информации о студенте
 
 void menu_choice(); // прототип меню
 
-void menu();
+void menu(); // прототип меню
 
-void delete_student(Group group, int index)
+void delete_student(Group group, int index) // функция удаления участника
 {
-	//group.student[index].rates.clear();
 	group.student.erase(group.student.begin() + index);
 	group.fact_count--;
 }
 
-void out_width()
+void out_width() // функция корректировки вывода времени
 {
-	cout << setw(2);
-	cout << setfill('0');
+	cout << setw(2); // ширина
+	cout << setfill('0'); // заполнение нулями
 }
 
-void printSystemTime(const SYSTEMTIME& st)
+void printSystemTime(const SYSTEMTIME& st) // вывод времени об создании/изменении
 {
 	//cout << "Дата создания: ";
 	out_width();
-	cout << right << st.wDay << ".";
+	cout << right << st.wDay << "."; // день
 	out_width();
-	cout << right << st.wMonth << ".";
+	cout << right << st.wMonth << "."; // месяц
 	out_width();
-	cout << st.wYear << " ";
+	cout << st.wYear << " "; // год
 	out_width();
-	cout << right << st.wHour << ":";
+	cout << right << st.wHour << ":"; // час
 	out_width();
-	cout << right << st.wMinute << ":";
+	cout << right << st.wMinute << ":"; // минута
 	out_width();
-	cout << right << st.wSecond;
+	cout << right << st.wSecond; // секунда
 }
 
-void fill_students(Group &group, ifstream &fin)
+void fill_students(Group &group, ifstream &fin) // заполнение данные структуры о группе
 {
-	int temp;
-	int count_grade = 0;
+	int temp; // временная переменная
+	int count_grade = 0; // сумма оценок студентов
 
-	if (fin.is_open())
+	if (fin.is_open()) // если файл удачно открыт
 	{
 		int i = 0;
-		while (!fin.eof())
+		while (!fin.eof()) // пока не дошли до конца файла
 		{
-			temp = 0;
-			count_grade = 0;
-			group.student[i].rates.resize(count_of_rates);
-			getline(fin, group.student[i].name, ' ');
-			getline(fin, group.student[i].surname, ' ');
-			getline(fin, group.student[i].father_name, ' ');
-			getline(fin, group.student[i].sex, ' ');
-			getline(fin, group.student[i].form_edu, ' ');
-			fin >> group.student[i].group_number;
-			fin >> group.student[i].list_number;
-			for (int j = 0; j <= count_of_rates - 1; j++)
+			temp = 0; // обнуляем переменную
+			count_grade = 0; // обнуляем сумму
+			group.student[i].rates.resize(count_of_rates); // расширяем массив оценок у студента
+			getline(fin, group.student[i].name, ' '); // заносим имя
+			getline(fin, group.student[i].surname, ' '); // заносим фамилию 
+			getline(fin, group.student[i].father_name, ' '); // заносим отчество
+			getline(fin, group.student[i].sex, ' '); // заносим пол
+			getline(fin, group.student[i].form_edu, ' '); // заносим форму обучения
+			fin >> group.student[i].group_number; // заносим номер группы
+			fin >> group.student[i].list_number; // заносим номер по списку
+			for (int j = 0; j <= count_of_rates - 1; j++) // заносим оценки студента
 			{
 				fin >> temp;
 				count_grade += temp;
 				group.student[i].rates[j] = temp;
 			}
-			group.student[i].grade = count_grade / count_of_rates;
-			GetLocalTime(&group.student[i].sys_t);
-			group.student[i].edit_flag = FALSE;
-			fin.ignore(1);
-			if (group.student[i].grade <= 2)
-				delete_student(group, i);
+			group.student[i].grade = count_grade / count_of_rates; // заносим средний балл по оценкам
+			GetLocalTime(&group.student[i].sys_t); // заносим время создания 
+			group.student[i].edit_flag = FALSE; // устанавливаем флаг изменения записей у студента 
+			fin.ignore(1); // игнорируем перенос строки
+			if (group.student[i].grade <= 2) // если средний балл студента ниже 2
+				delete_student(group, i); // удаляем 
 			else
 			{
-				i++;
-				group.fact_count++;
+				i++; // увеличиваем счетчик
+				group.fact_count++; // увеличиваем фактическое количество студентов в группе
 			}
 		}
 	}
-	else
+	else // если файл открыть не удалось
 	{
 		cout << "Файл не удалось открыть!" << endl;
 	}
-	fin.close();
+	fin.close(); // закрываем файл
 }
 
-void change_group(Group& group, int gr_index, char* value)
+void change_group(Group& group, int gr_index, char* value) // функция переноса изменений информации о студенте в общую группу
 {
 	for (int i = 0; i < group_all.fact_count - 1; i++)
 	{
 		switch (*value)
 		{
-		case '1':
+		case '1': // изменилось имя
 			if(group_all.student[i].surname == group.student[gr_index].surname and group_all.student[i].father_name == group.student[gr_index].father_name)
 				group_all.student[gr_index] = group.student[gr_index];
 			break;
-		case '2':
+		case '2': // изменилась фамилия
 			if (group_all.student[i].name == group.student[gr_index].name and group_all.student[i].father_name == group.student[gr_index].father_name)
 				group_all.student[gr_index] = group.student[gr_index];
 			break;
-		case '3':
+		case '3': // изменилось отчество
 			if (group_all.student[i].surname == group.student[gr_index].surname and group_all.student[i].name == group.student[gr_index].name)
 				group_all.student[gr_index] = group.student[gr_index];
 			break;
-		case '4':
+		case '4': // изменился пол
 			if (group_all.student[i].surname == group.student[gr_index].surname and group_all.student[i].father_name == group.student[gr_index].father_name)
 				group_all.student[gr_index] = group.student[gr_index];
 			break;
-		case '5':
+		case '5': // изменилась форма обучения
 			if (group_all.student[i].surname == group.student[gr_index].surname and group_all.student[i].father_name == group.student[gr_index].father_name)
 				group_all.student[gr_index] = group.student[gr_index];
 			break;
-		case '6':
+		case '6': // изменились оценки
 			if (group_all.student[i].surname == group.student[gr_index].surname and group_all.student[i].father_name == group.student[gr_index].father_name)
 				group_all.student[gr_index] = group.student[gr_index];
 			break;
@@ -162,16 +161,15 @@ void change_group(Group& group, int gr_index, char* value)
 	}
 }
 
-void add_group(Group &group, int gr_index)
+void add_group(Group &group, int gr_index) // функция добавления студентов в общую группу
 {
-	group_all.student.resize(group_count + 1);
-	//group_all.student.push_back(group.student[gr_index]);
+	group_all.student.resize(group_count + 1); // расширям массив для нового студента
 	group_all.student[index] = group.student[gr_index];
 	index++;
 	group_all.fact_count++;
 }
 
-void fill_group()
+void fill_group() // функция объединения двух групп в одну
 {
 	group_count = gr9894.fact_count + gr9893.fact_count;
 	group_all.student.resize(group_count);
@@ -189,7 +187,7 @@ void fill_group()
 	}
 }
 
-void print_rates(const Group& group, const int& list_number)
+void print_rates(const Group& group, const int& list_number) // вывод оценок студента
 {
 	for (int i = 0; i <= count_of_rates - 1; i++)
 	{
@@ -197,7 +195,7 @@ void print_rates(const Group& group, const int& list_number)
 	}
 }
 
-void print_group_student(const Group& group)
+void print_group_student(const Group& group) // вывод группы студентов
 {
 	system("cls"); // очищаем консоль
 	cout << "Список студентов: " << endl;
@@ -233,7 +231,7 @@ void print_group_student(const Group& group)
 	menu();
 }
 
-void add_student(Group &group)
+void add_student(Group &group) // добавление новой записи о студенте
 {
 	group.student.resize(group.fact_count + 1);
 	int temp = 0;
@@ -244,11 +242,11 @@ void add_student(Group &group)
 	cin >> group.student[group.fact_count].surname;
 	cout << "FatherName: ";
 	cin >> group.student[group.fact_count].father_name;
-	cout << "Sex: ";
+	cout << "Sex(Male/Female): ";
 	cin >> group.student[group.fact_count].sex;
-	cout << "FormEdu: ";
+	cout << "FormEdu(den/vecher): ";
 	cin >> group.student[group.fact_count].form_edu;
-	cout << "GroupNumber: ";
+	cout << "GroupNumber(9894/9893): ";
 	cin >> group.student[group.fact_count].group_number;
 	cout << "ListNumber: ";
 	cin >> group.student[group.fact_count].list_number;
@@ -268,7 +266,7 @@ void add_student(Group &group)
 	menu();
 }
 
-void checkgroup()
+void checkgroup() // функция выбора группы для вывода студентов
 { // функция проверки выбранного действия
 	char value[256]; // переменная, которая хранит выбранное значение
 	cin >> value; // вводим выбранное значение 
@@ -295,7 +293,7 @@ void checkgroup()
 	}
 }
 
-int check_list(const Group& group)
+int check_list(const Group& group) // проверка номера студента по списку
 {
 	while (true)
 	{
@@ -326,7 +324,7 @@ int check_list(const Group& group)
 	}
 }
 
-void print_student_info(const Group &group, int list_number)
+void print_student_info(const Group &group, int list_number) // вывод записи о студенте
 {
 	cout << setfill(' ');
 	cout << setw(12) << left << group.student[list_number].name << " "
@@ -341,7 +339,7 @@ void print_student_info(const Group &group, int list_number)
 	cout << setfill(' ');
 }
 
-void change_rates(Group &group, int list_number)
+void change_rates(Group &group, int list_number) // изменение текущих оценок у студента
 {
 	for (int i = 0; i <= count_of_rates - 1; i++)
 	{
@@ -350,7 +348,7 @@ void change_rates(Group &group, int list_number)
 	}
 }
 
-void CheckChangeInfo(Group &group, int list_number)
+void CheckChangeInfo(Group &group, int list_number) // изменение в существующую запись студента
 {
 	bool par = FALSE;
 
@@ -398,7 +396,7 @@ void CheckChangeInfo(Group &group, int list_number)
 			CheckChangeInfo(group, list_number);
 		}
 		GetLocalTime(&group.student[list_number].sys_t);
-		group.student[list_number].edit_flag = TRUE;
+		group.student[list_number].edit_flag = TRUE; // устанавливается флаг изменения информации о студенте
 		change_group(group, list_number, value);
 		cout << "Do you want change another one info about student?(1 - yes/0 - no)  ___";
 		cin >> par;
@@ -409,7 +407,7 @@ void CheckChangeInfo(Group &group, int list_number)
 	}
 }
 
-void change_info_student()
+void change_info_student() // выбор группы для изменения записи о студенте
 {
 	system("cls"); // очищаем консоль
 	cout << "Choose the group number:" << endl;
@@ -422,13 +420,13 @@ void change_info_student()
 	menu();
 }
 
-void info_student(Group &group)
+void info_student(Group &group) // изменение данных о студенте
 {
 	int list_number;
 	cout << "Enter list number of student: ";
 	list_number = check_list(group);
 	print_student_info(group, list_number);
-	cout << "What the info do you want to change?" << endl;
+	cout << endl << "What the info do you want to change?" << endl;
 	cout << "1. Name" << endl;
 	cout << "2. Surname" << endl;
 	cout << "3. FatherName" << endl;
@@ -439,13 +437,13 @@ void info_student(Group &group)
 	CheckChangeInfo(group, list_number);
 }
 
-void choose_print_group()
+void choose_print_group() // выбор группы для вывода
 {
 	system("cls"); // очищаем консоль
 	cout << "Choose the group:" << endl;
 	cout << "1. 9894" << endl;
 	cout << "2. 9893" << endl;
-	cout << "Chose the group - ___" << endl;
+	cout << "Chose the group - ___";
 	// функция проверки выбранного действия
 	char value[256]; // переменная, которая хранит выбранное значение
 	cin >> value; // вводим выбранное значение 
@@ -481,7 +479,7 @@ void swap(Group* first_p, Group* second_p) // смена переменных между собой
 	*second_p = temp;
 }
 
-void print_rating_students()
+void print_rating_students() // сортировка студентов по среднему баллу по убыванию
 {
 	system("cls"); // очищаем консоль
 	for (int i = 0; i < group_count - 1; i++)
@@ -497,14 +495,14 @@ void print_rating_students()
 	print_group_student(group_all);
 }
 
-void print_info()
+void print_info() // вывод статистической информации о студентах
 {
 	system("cls"); // очищаем консоль
 
-	int count_male = 0;
-	int count_female = 0;
-	int count_money = 0;
-	bool br_flag = FALSE;
+	int count_male = 0; // количество М
+	int count_female = 0; // количество Ж
+	int count_money = 0; // количество студентов со стипендией
+	bool br_flag = FALSE; // флаг для прекращения цикла
 	int j = 0;
 
 	for (int i = 0; i < group_count - 1; i++)
@@ -535,7 +533,7 @@ void print_info()
 	menu();
 }
 
-void print_student_Scholarship()
+void print_student_Scholarship() // вывод студентов без стипендии - студенты на 4 - студенты на 5
 {
 	system("cls"); // очищаем консоль
 
@@ -606,7 +604,7 @@ void print_student_Scholarship()
 	menu();
 }
 
-void print_student_listnumber()
+void print_student_listnumber() // вывод студентов, в зависимости от их номера по списку, вводимового пользователем
 {
 	system("cls"); // очищаем консоль
 	int list_number;
@@ -630,7 +628,7 @@ void print_student_listnumber()
 	menu();
 }
 
-void print_group_in_file()
+void print_group_in_file() // вывод всех данных о студентах в файл Student
 {
 	system("cls"); // очищаем консоль
 	ofstream fout;
@@ -705,7 +703,7 @@ struct kubok {
 	vector<team> player{ count_of_players };
 } Kubok_team;
 
-void kubok_fill_student(kubok &team, ifstream &fin)
+void kubok_fill_student(kubok &team, ifstream &fin) // заполнение массива данными об участниках
 {
 	if (fin.is_open())
 	{
@@ -732,8 +730,9 @@ void kubok_fill_student(kubok &team, ifstream &fin)
 	fin.close();
 }
 
-void kubok_print_student(const kubok &team)
+void kubok_print_student(const kubok &team) // вывод всех участников Кубка Первокурсника
 {
+	system("cls"); // очищаем консоль
 	int i = 0;
 
 	cout << "Список участников в Кубке Первокурсника: " << endl;
@@ -760,9 +759,11 @@ void kubok_print_student(const kubok &team)
 		i++;
 	}
 
+	system("pause");
+	menu();
 }
 
-void kubok_print_student_info(const kubok& team, int index)
+void kubok_print_student_info(const kubok& team, int index) // вывод участника Кубка первокурсника по позиции в массиве
 {
 	cout << endl << endl;
 	cout << "Список капитанов моложе 18 лет со знаком ГТО: " << endl;
@@ -787,8 +788,9 @@ void kubok_print_student_info(const kubok& team, int index)
 		cout << setw(2) << "NO" << endl;
 }
 
-void kubok_indidid_zad(const kubok &team)
+void kubok_indidid_zad(const kubok &team) // вывод капитанов моложе 18 лет со значком ГТО
 {
+	system("cls");
 	int i = 0;
 	while (i <= team.fact_count - 1)
 	{
@@ -797,6 +799,43 @@ void kubok_indidid_zad(const kubok &team)
 			kubok_print_student_info(team, i);
 		}
 		i++;
+	}
+	system("pause");
+	menu();
+}
+
+void Check_kubok() // выбор действия после нажатия на "Индивидуальное задание"
+{
+	system("cls");
+	cout << "Какую информацию вы хотите получить?" << endl;
+	cout << "1. Список участников Кубка Первокурсника" << endl;
+	cout << "2. Список капитанов моложе 18 лет со значком ГТО" << endl;
+	cout << "3. Назад в меню" << endl;
+	
+	char value[256]; // переменная, которая хранит выбранное значение
+	cin >> value; // вводим выбранное значение 
+	if (strlen(value) == 1) // проверяем количество введенных символов. Если много, то просим ввести еще раз, иначе проверям дальше
+	{
+		switch (value[0]) // проверям, взяв первый символ переменной value
+		{
+		case '1': // инфа об участников
+			kubok_print_student(Kubok_team);
+			break;
+		case '2': // капитаны, моложе 18 лет со значком ГТО
+			kubok_indidid_zad(Kubok_team);
+			break;
+		case '3':
+			menu();
+		default: // если число не подходит ни к одному из
+			cout << "Значение введено неверно. Введите заново" << endl;
+			Check_kubok();
+			break;
+		}
+	}
+	else // если введено символов больше необходимого
+	{
+		cout << "Необходимо ввести один символ. Попробуйте ввести заново" << endl;
+		Check_kubok();
 	}
 }
 
@@ -832,6 +871,9 @@ void conf_val() // выбор после подтверждения в зависимости от значения текущего
 		print_group_in_file();
 		break;
 	case 9:
+		Check_kubok();
+		break;
+	case 10:
 		SetColor(7, 7);
 		exit(0);
 		break;
@@ -859,6 +901,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
 	}
@@ -877,6 +920,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
 	}
@@ -895,6 +939,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
 	}
@@ -913,6 +958,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
 	}
@@ -931,6 +977,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
 	}
@@ -949,6 +996,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
 	}
@@ -967,6 +1015,7 @@ void menu() // меню
 		SetColor(0, 7);
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
 	}
@@ -985,6 +1034,7 @@ void menu() // меню
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		SetColor(0, 7);
 		cout << "Вывод записей в файл" << endl;
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
 	}
@@ -1003,6 +1053,7 @@ void menu() // меню
 		SetColor(5, 7);
 		cout << "Вывод записей в файл" << endl;
 		SetColor(0, 7);
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
 	}
@@ -1019,6 +1070,26 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		SetColor(5, 7);
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
+		SetColor(0, 7);
+		cout << "Выход" << endl;
+		menu_choice();
+	}
+	if (m_count == 10)
+	{
+		cout.width(15);
+		cout << right << "__МЕНЮ__" << endl;
+		cout << "Создать запись о студенте" << endl;
+		cout << "Внести изменения в существующую запись студента" << endl;
+		cout << "Все записи о студентах" << endl;
+		cout << "Все записи о группе" << endl;
+		cout << "Топ умных студентов по среднему баллу" << endl;
+		cout << "Информация по студентам" << endl;
+		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
+		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
+		cout << "Вывод записей в файл" << endl;
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		SetColor(5, 7);
 		cout << "Выход" << endl;
 		SetColor(0, 7);
@@ -1042,7 +1113,7 @@ void menu_choice() // в зависимости от стрелок изменяем меню
 
 		case 0x50: // стрелка вниз
 			m_count++;
-			if (m_count > 9) m_count = 9;
+			if (m_count > 10) m_count = 10;
 			menu();
 			break;
 		case 0xD: // подтвердить
@@ -1062,7 +1133,7 @@ void menu_choice() // в зависимости от стрелок изменяем меню
 
 	case 0x50: // стрелка вниз
 		m_count++;
-		if (m_count > 9) m_count = 9;
+		if (m_count > 10) m_count = 10;
 		menu();
 		break;
 	case 0xD: // подтвердить
@@ -1092,33 +1163,11 @@ int main()
 	fill_students(gr9894, fin);
 	fin.open("gr9893.txt");
 	fill_students(gr9893, fin);
-
-	fill_group();
-	//system("pause");
-	//print_group_student(group_all);
-	//choose_print_group();
-	//print_group_student(gr9894);
-
-	//change_info_student();
-	//print_group_student(gr9894);
-	menu();
-	//add_student(gr9894);
-
-	//print_group_student(group_all);
-	//print_rating_students();
-	//print_info();
-
-	//print_student_Scholarship();
-	//print_group_in_file();
-	/*print_group_student(gr9894);
-
-	delete_student(gr9894, 4);
-	print_group_student(gr9894);*/
-
 	fin.open("team.txt");
 	kubok_fill_student(Kubok_team, fin);
-	kubok_print_student(Kubok_team);
-	kubok_indidid_zad(Kubok_team);
+
+	fill_group();
+	menu();
 
 	system("pause");
 	return 0;
