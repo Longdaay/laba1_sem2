@@ -1,3 +1,27 @@
+//	Практическая работа №1 - Пользовательсакие структуры.
+//	Необходимо создать массив структур, содержащий информацию о студентах: ФИО, пол, номер группы, номер в списке группы, оценки за прошедшую сессию (всего 3 экзамена и 5 дифф. зачётов),
+//	форма обучения, отметка времени о внесении или изменении данных. 
+//	Если студент имеет оценку 2, то запись о нем нужно удалить. 
+//	Написать функции, реализующие операции со структурами: 
+//		1. создание новой записи о студенте;
+//		2. внесение изменений в уже имеющуюся запись;
+//		3. вывод всех данных о студентах;
+//		4. вывод информации о всех студентах группы N.N – инициализируется пользователем;
+//		5. вывод топа самых умных студентов с наивысшим по рейтингу среднем баллом за прошедшую сессию;
+//		6. вывод количества студентов мужского и женского пола;
+//		7. определение количества студентов, которые будут получать стипендию(стипендия начисляется если у студента нет 3 и форма обучения - очная);
+//		8. вывод данных о студентах, которые не получают стипендию; учатся только на «хор»; учатся на «хор» и «отл»; учатся только на «отл»;
+//		9. вывод всех записей, сделанных в день, который введёт пользователь. Вывод всех записей, сделанных после полудня. Вывод всех записей, сделанных до полудня;
+//		10. вывод данных о студентах, имеющий номер в списке – k;
+//		11. вывод данных о всех студентах в файл students.
+//	Также индивидуальное задание - в университете проходит «Кубок первокурсника» – спортивные соревнования по волейболу, баскетболу, футболу, скалолазанию и плаванию.
+//	Необходимо создать новую структуру, которая будет содержать информацию о названии команды, ФИО капитана команды, наличие золотого значка ГТО, годе рождения.
+//	Вывести информацию о студентах, которые: 
+//		моложе 18 лет; 
+//		имеют золотой значок ГТО;
+//		являются капитанами команды.
+
+
 #include <iostream> // для ввода/вывода
 #include <vector> //для создания массива
 #include <string> // для создания строк
@@ -22,6 +46,7 @@ int index = 0;
 int group_count = 0; // количество участников
 int count_of_players = 30; // количество участников в Кубке Первокурсника
 int m_count = 0; // значения для меню - это значение изменяется при нажатии стрелок вверх или вниз
+int sub_count = 0; // значение для подменю
 
 struct Student
 {
@@ -29,13 +54,13 @@ struct Student
 	string surname; //Фамилия
 	string father_name; //Отчество
 	string sex; //Пол
-	int group_number; // номер группы
-	int list_number;
+	int group_number = 0; // номер группы
+	int list_number = 0;
 	vector<int> rates{ count_of_rates }; //Оценки
 	string form_edu; //Форма обучения
 	SYSTEMTIME sys_t; //Отметка времени о создании или изменении данных
-	bool edit_flag; // 1 - если данные изменялись
-	int grade; // средний балл
+	bool edit_flag = FALSE; // 1 - если данные изменялись
+	int grade = 0; // средний балл
 };
 
 struct Group
@@ -45,10 +70,60 @@ struct Group
 } gr9894, gr9893, group_all;
 
 void info_student(Group &group); // прототип вывода информации о студенте
-
 void menu_choice(); // прототип меню
-
 void menu(); // прототип меню
+void submenu_choice();
+void menu_kubok();
+
+int checkdigit()
+{
+	while (true)
+	{
+		int value;
+		// вводим число, которое хотим представить в двоичной форме
+		cin >> value; // число целое
+		if (cin.fail()) // ecли предыдущее извелечение оказлось неудачным,
+		{
+			cin.clear(); // то возвращаем cin в обычный режим работы
+			cin.ignore(32767, '\n'); // и удаляем из буфера значения предыдущего ввода 
+			cout << "Недопустимое заданное число. Введите число правильно" << '\n';
+		}
+		else
+		{
+			cin.ignore(32767, '\n'); // удаляем из буфера значения предыдущего ввода 
+			return value;
+		}
+	}
+}
+
+int checkdigit_date()
+{
+	while (true)
+	{
+		int value;
+		// вводим число, которое хотим представить в двоичной форме
+		cin >> value; // число целое
+		if (cin.fail()) // ecли предыдущее извелечение оказлось неудачным,
+		{
+			cin.clear(); // то возвращаем cin в обычный режим работы
+			cin.ignore(32767, '\n'); // и удаляем из буфера значения предыдущего ввода 
+			cout << "Недопустимое заданное число. Введите число правильно" << '\n';
+		}
+		else
+		{
+			cin.ignore(32767, '\n'); // удаляем из буфера значения предыдущего ввода 
+			if (value > 0 and value <= 31)
+				return value;
+			else
+				cout << "Такого дня не существует. Введите, пожалуйста, заново" << endl;
+		}
+	}
+}
+
+void print_noone()
+{
+	cout << endl << setw(50) << right << "Таких записей о студентах нет" << endl << endl;
+}
 
 void delete_student(Group group, int index) // функция удаления участника
 {
@@ -206,6 +281,7 @@ void print_group_student(const Group& group) // вывод группы студентов
 		<< setw(15) << left << "ListNumber" << setw(10) << left << "Time" << endl;
 
 	int i = 0;
+	bool count_entry = FALSE;
 	while (i <= group.fact_count - 1)
 	{
 		cout << setfill(' ');
@@ -223,7 +299,10 @@ void print_group_student(const Group& group) // вывод группы студентов
 		else
 			cout << setw(2) << "  add data" << endl;
 		i++;
+		count_entry = TRUE;
 	}
+	if (count_entry = FALSE)
+		print_noone();
 	cout << endl;
 	cout << setfill(' ');
 
@@ -236,21 +315,21 @@ void add_student(Group &group) // добавление новой записи о студенте
 	group.student.resize(group.fact_count + 1);
 	int temp = 0;
 	system("cls"); // очищаем консоль
-	cout << "Name: ";
+	cout << "Имя: ";
 	cin >> group.student[group.fact_count].name;
-	cout << "Surname: ";
+	cout << "Фамилия: ";
 	cin >> group.student[group.fact_count].surname;
-	cout << "FatherName: ";
+	cout << "Отчество: ";
 	cin >> group.student[group.fact_count].father_name;
-	cout << "Sex(Male/Female): ";
+	cout << "Пол(Male/Female): ";
 	cin >> group.student[group.fact_count].sex;
-	cout << "FormEdu(den/vecher): ";
+	cout << "Форма обучения(den/vecher): ";
 	cin >> group.student[group.fact_count].form_edu;
-	cout << "GroupNumber(9894/9893): ";
+	cout << "Номер группы(9894/9893): ";
 	cin >> group.student[group.fact_count].group_number;
-	cout << "ListNumber: ";
+	cout << "Номер по списку: ";
 	cin >> group.student[group.fact_count].list_number;
-	cout << "Rating: " << endl;
+	cout << "Оценки за семестр: " << endl;
 	for (int j = 0; j <= count_of_rates - 1; j++)
 	{
 		cout << j << ": ";
@@ -308,17 +387,16 @@ int check_list(const Group& group) // проверка номера студента по списку
 		}
 		else
 		{
-			value--;
 			for (int i = 0; i <= group.fact_count - 1; i++)
 			{
 				if(group.student[i].list_number == value)
 				{
 					cin.ignore(32767, '\n'); // удаляем из буфера значения предыдущего ввода 
-					return value;
+					return value - 1;
 				}
 			}
-			cout << "This list number isn't exist. Try again" << endl;
-			cout << "List number is ";
+			cout << "Такого номера не существует. Введите, пожалуйста, заново" << endl;
+			cout << "Номер по списку - ";
 			check_list(group);
 		}
 	}
@@ -343,8 +421,8 @@ void change_rates(Group &group, int list_number) // изменение текущих оценок у с
 {
 	for (int i = 0; i <= count_of_rates - 1; i++)
 	{
-		cout << "Current rate: " << group.student[list_number].rates[i] << " Change rate - ";
-		cin >> group.student[list_number].rates[i];
+		cout << "Текущая оценка: " << group.student[list_number].rates[i] << " Меняем оценку на - ";
+		group.student[list_number].rates[i] = checkdigit();
 	}
 }
 
@@ -361,27 +439,27 @@ void CheckChangeInfo(Group &group, int list_number) // изменение в существующую 
 			switch (value[0]) // проверям, взяв первый символ переменной value
 			{
 			case '1': //
-				cout << "Enter new value: ";
+				cout << "Введите новое значение: ";
 				cin >> group.student[list_number].name;
 				break;
 			case '2': //
-				cout << "Enter new value: ";
+				cout << "Введите новое значение: ";
 				cin >> group.student[list_number].surname;
 				break;
 			case '3': //
-				cout << "Enter new value: ";
+				cout << "Введите новое значение: ";
 				cin >> group.student[list_number].father_name;
 				break;
 			case '4': //
-				cout << "Enter new value: ";
+				cout << "Введите новое значение: ";
 				cin >> group.student[list_number].sex;
 				break;
 			case '5': //
-				cout << "Enter new value: ";
+				cout << "Введите новое значение: ";
 				cin >> group.student[list_number].form_edu;
 				break;
 			case '6': //
-				cout << "Enter new value: ";
+				cout << "Введите новое значение: ";
 				change_rates(group, list_number);
 				break;
 			default: // если число не подходит ни к одному из
@@ -398,7 +476,7 @@ void CheckChangeInfo(Group &group, int list_number) // изменение в существующую 
 		GetLocalTime(&group.student[list_number].sys_t);
 		group.student[list_number].edit_flag = TRUE; // устанавливается флаг изменения информации о студенте
 		change_group(group, list_number, value);
-		cout << "Do you want change another one info about student?(1 - yes/0 - no)  ___";
+		cout << "Вы хотите изменить данные еще раз?(1 - да/0 - нет)  ___";
 		cin >> par;
 		if (par)
 			info_student(group);
@@ -410,10 +488,10 @@ void CheckChangeInfo(Group &group, int list_number) // изменение в существующую 
 void change_info_student() // выбор группы для изменения записи о студенте
 {
 	system("cls"); // очищаем консоль
-	cout << "Choose the group number:" << endl;
+	cout << "Выберите номер группы:" << endl;
 	cout << "1. 9894" << endl;
 	cout << "2. 9893" << endl;
-	cout << "Your chose: ";
+	cout << "Ваш выбор: ";
 	checkgroup();
 
 	system("pause");
@@ -423,27 +501,27 @@ void change_info_student() // выбор группы для изменения записи о студенте
 void info_student(Group &group) // изменение данных о студенте
 {
 	int list_number;
-	cout << "Enter list number of student: ";
+	cout << "Введите номер по списку: ";
 	list_number = check_list(group);
 	print_student_info(group, list_number);
-	cout << endl << "What the info do you want to change?" << endl;
-	cout << "1. Name" << endl;
-	cout << "2. Surname" << endl;
-	cout << "3. FatherName" << endl;
-	cout << "4. Sex" << endl;
-	cout << "5. FormEdu" << endl;
-	cout << "6. Rates" << endl;
-	cout << "Your chose: ";
+	cout << endl << "Какие данные вы хотите изменить?" << endl;
+	cout << "1. Имя" << endl;
+	cout << "2. Фамилия" << endl;
+	cout << "3. Отчество" << endl;
+	cout << "4. Пол" << endl;
+	cout << "5. Форма обучения" << endl;
+	cout << "6. Оценки за семестр" << endl;
+	cout << "Ваш выбор: ";
 	CheckChangeInfo(group, list_number);
 }
 
 void choose_print_group() // выбор группы для вывода
 {
 	system("cls"); // очищаем консоль
-	cout << "Choose the group:" << endl;
+	cout << "Выберите группу:" << endl;
 	cout << "1. 9894" << endl;
 	cout << "2. 9893" << endl;
-	cout << "Chose the group - ___";
+	cout << "Ваш выбор - ___";
 	// функция проверки выбранного действия
 	char value[256]; // переменная, которая хранит выбранное значение
 	cin >> value; // вводим выбранное значение 
@@ -539,6 +617,7 @@ void print_student_Scholarship() // вывод студентов без стипендии - студенты на 
 
 	bool br_flag = FALSE;
 	int j = 0;
+	bool count_entry = FALSE;
 
 	cout << "Список студентов без стипендии: " << endl;
 	cout << setw(3) << left << "№" << setw(13) << left << "Name"
@@ -559,10 +638,13 @@ void print_student_Scholarship() // вывод студентов без стипендии - студенты на 
 				br_flag = TRUE;
 				print_student_info(group_all, i);
 				cout << endl;
+				count_entry = TRUE;
 			}
 			j++;
 		}
 	}
+	if (count_entry = FALSE)
+		print_noone();
 
 	cout << endl << endl;
 	cout << "Список студентов, которые учатся только на 4: " << endl;
@@ -572,6 +654,7 @@ void print_student_Scholarship() // вывод студентов без стипендии - студенты на 
 		<< setw(13) << left << "Rating" << setw(13) << left << "GroupNumber"
 		<< setw(15) << left << "ListNumber" << setw(10) << left << "Time" << endl;
 
+	count_entry = FALSE;
 	for (int i = 0; i < group_count - 1; i++)
 	{
 		if (group_all.student[i].grade == 4)
@@ -579,8 +662,11 @@ void print_student_Scholarship() // вывод студентов без стипендии - студенты на 
 			cout << setw(3) << left << i + 1;
 			print_student_info(group_all, i);
 			cout << endl;
+			count_entry = TRUE;
 		}
 	}
+	if (count_entry = FALSE)
+		print_noone();
 
 	cout << endl << endl;
 	cout << "Список студентов, которые учатся только на 5: " << endl;
@@ -590,6 +676,7 @@ void print_student_Scholarship() // вывод студентов без стипендии - студенты на 
 		<< setw(13) << left << "Rating" << setw(13) << left << "GroupNumber"
 		<< setw(15) << left << "ListNumber" << setw(10) << left << "Time" << endl;
 
+	count_entry = FALSE;
 	for (int i = 0; i < group_count - 1; i++)
 	{
 		if (group_all.student[i].grade == 5)
@@ -597,8 +684,63 @@ void print_student_Scholarship() // вывод студентов без стипендии - студенты на 
 			cout << setw(3) << left << i + 1;
 			print_student_info(group_all, i);
 			cout << endl;
+			count_entry = TRUE;
 		}
 	}
+	if (count_entry == FALSE)
+		print_noone();
+
+	system("pause");
+	menu();
+}
+
+void print_student_day()
+{
+	system("cls");
+	int day;
+	bool count_entry = FALSE;
+	cout << "Введите номер дня: ";
+	day = checkdigit_date();
+
+	for (int i = 0; i < group_count - 1; i++)
+	{
+		if (group_all.student[i].sys_t.wDay == day)
+		{
+			print_student_info(group_all, i);
+			cout << endl;
+			count_entry = TRUE;
+		}
+	}
+	if (count_entry == FALSE)
+		print_noone();
+
+	cout << endl << "Вывод всех записей, сделанных после полудня" << endl;
+	count_entry = FALSE;
+	for (int i = 0; i < group_count - 1; i++)
+	{
+		if (group_all.student[i].sys_t.wHour >= 12)
+		{
+			print_student_info(group_all, i);
+			cout << endl;
+			count_entry = TRUE;
+		}
+	}
+	if (count_entry == FALSE)
+		print_noone();
+
+	cout << endl << "Вывод всех записей, сделанных до полудня" << endl;
+	count_entry = FALSE;
+	for (int i = 0; i < group_count - 1; i++)
+	{
+		if (group_all.student[i].sys_t.wHour <= 12)
+		{
+			print_student_info(group_all, i);
+			cout << endl;
+			count_entry = TRUE;
+		}
+	}
+	if (count_entry == FALSE)
+		print_noone();
 
 	system("pause");
 	menu();
@@ -610,8 +752,8 @@ void print_student_listnumber() // вывод студентов, в зависимости от их номера п
 	int list_number;
 	bool br_flag = FALSE;
 
-	cout << "Enter the listnumber student: ";
-	cin >> list_number;
+	cout << "Введите номер по списку студента: ";
+	list_number = checkdigit();
 	for (int i = 0; i < group_count - 1; i++)
 	{
 		if (group_all.student[i].list_number == list_number)
@@ -623,7 +765,7 @@ void print_student_listnumber() // вывод студентов, в зависимости от их номера п
 		}
 	}
 	if (!br_flag)
-		cout << "ListNumber is not exist" << endl;
+		cout << "Такого номера не существует" << endl;
 	system("pause");
 	menu();
 }
@@ -710,7 +852,6 @@ void kubok_fill_student(kubok &team, ifstream &fin) // заполнение массива данным
 		int i = 0;
 		while (!fin.eof())
 		{
-			//team.player.resize(count_of_players);
 			getline(fin, team.player[i].TeamName, ' ');
 			getline(fin, team.player[i].Surname, ' ');
 			getline(fin, team.player[i].Name, ' ');
@@ -734,6 +875,7 @@ void kubok_print_student(const kubok &team) // вывод всех участников Кубка Перво
 {
 	system("cls"); // очищаем консоль
 	int i = 0;
+	bool count_entry = FALSE;
 
 	cout << "Список участников в Кубке Первокурсника: " << endl;
 	cout << setw(3) << left << "№" << setw(13) << left << "TeamName" << setw(16) << left << "Name"
@@ -757,23 +899,18 @@ void kubok_print_student(const kubok &team) // вывод всех участников Кубка Перво
 		else
 			cout << setw(2) << "NO" << endl;
 		i++;
+		count_entry = TRUE;
 	}
+	if (count_entry == FALSE)
+		print_noone();
 
 	system("pause");
-	menu();
+	menu_kubok();
 }
 
 void kubok_print_student_info(const kubok& team, int index) // вывод участника Кубка первокурсника по позиции в массиве
 {
-	cout << endl << endl;
-	cout << "Список капитанов моложе 18 лет со знаком ГТО: " << endl;
-	cout << setw(3) << left << "№" << setw(13) << left << "TeamName" << setw(16) << left << "Name"
-		<< setw(16) << left << "Surname" << setw(16) << left << "FatherName"
-		<< setw(15) << left << "YearOfBirth" << setw(10) << left << "Captain"
-		<< setw(13) << left << "GTO" << endl;
-
-	cout << setfill(' ');
-	cout << setw(3) << left << index << setw(12) << left << team.player[index].TeamName << " "
+	cout << setw(3) << left << index + 1 << setw(12) << left << team.player[index].TeamName << " "
 		<< setw(12) << left << team.player[index].Name << " \t"
 		<< setw(10) << left << team.player[index].Surname << " \t"
 		<< setw(8) << left << team.player[index].FatherName << " \t"
@@ -788,20 +925,279 @@ void kubok_print_student_info(const kubok& team, int index) // вывод участника К
 		cout << setw(2) << "NO" << endl;
 }
 
-void kubok_indidid_zad(const kubok &team) // вывод капитанов моложе 18 лет со значком ГТО
+void kubok_print_individ(const kubok& team)
 {
 	system("cls");
+	cout << endl;
+	cout << "Список капитанов моложе 18 лет со знаком ГТО: " << endl;
+	cout << setw(3) << left << "№" << setw(13) << left << "TeamName" << setw(16) << left << "Name"
+		<< setw(16) << left << "Surname" << setw(16) << left << "FatherName"
+		<< setw(15) << left << "YearOfBirth" << setw(10) << left << "Captain"
+		<< setw(13) << left << "GTO" << endl;
+
+	cout << setfill(' ');
+	bool count_entry = FALSE;
 	int i = 0;
 	while (i <= team.fact_count - 1)
 	{
-		if (team.player[i].captain_flag == TRUE and team.player[i].gto_order == TRUE and (2020 - team.player[i].year_of_birth) < 18)
+		if (team.player[i].gto_order == TRUE and (2020 - team.player[i].year_of_birth) < 18 and team.player[i].captain_flag == TRUE)
 		{
 			kubok_print_student_info(team, i);
+			count_entry++;
 		}
 		i++;
 	}
+	if (count_entry == FALSE)
+		print_noone();
 	system("pause");
-	menu();
+	menu_kubok();
+}
+
+void kubok_print_GTO_ordet(const kubok& team) // вывод со значком ГТО
+{
+	system("cls");
+	cout << endl;
+	cout << "Список участников со значком ГТО: " << endl;
+	cout << setw(3) << left << "№" << setw(13) << left << "TeamName" << setw(16) << left << "Name"
+		<< setw(16) << left << "Surname" << setw(16) << left << "FatherName"
+		<< setw(15) << left << "YearOfBirth" << setw(10) << left << "Captain"
+		<< setw(13) << left << "GTO" << endl;
+	cout << setfill(' ');
+	bool count_entry = FALSE;
+	int i = 0;
+	while (i <= team.fact_count - 1)
+	{
+		if (team.player[i].gto_order == TRUE)
+		{
+			kubok_print_student_info(team, i);
+			count_entry = TRUE;
+		}
+		i++;
+	}
+	if (count_entry == FALSE)
+		print_noone();
+	system("pause");
+	menu_kubok();
+}
+
+void kubok_print_eighteen_year(const kubok&team) // вывод моложе 18 лет
+{
+	system("cls");
+	cout << endl;
+	cout << "Список участников моложе 18 лет: " << endl;
+	cout << setw(3) << left << "№" << setw(13) << left << "TeamName" << setw(16) << left << "Name"
+		<< setw(16) << left << "Surname" << setw(16) << left << "FatherName"
+		<< setw(15) << left << "YearOfBirth" << setw(10) << left << "Captain"
+		<< setw(13) << left << "GTO" << endl;
+
+	cout << setfill(' ');
+	bool count_entry = FALSE;
+	int i = 0;
+	while (i <= team.fact_count - 1)
+	{
+		if ((2020 - team.player[i].year_of_birth) < 18)
+		{
+			kubok_print_student_info(team, i);
+			count_entry = TRUE;
+		}
+		i++;
+	}
+	if (count_entry == FALSE)
+		print_noone();
+	system("pause");
+	menu_kubok();
+}
+
+void kubok_print_captain(const kubok &team) // вывод капитанов
+{
+	system("cls");
+	cout << endl;
+	cout << "Список капитанов команд: " << endl;
+	cout << setw(3) << left << "№" << setw(13) << left << "TeamName" << setw(16) << left << "Name"
+		<< setw(16) << left << "Surname" << setw(16) << left << "FatherName"
+		<< setw(15) << left << "YearOfBirth" << setw(10) << left << "Captain"
+		<< setw(13) << left << "GTO" << endl;
+
+	cout << setfill(' ');
+	bool count_entry = FALSE;
+	int i = 0;
+	while (i <= team.fact_count - 1)
+	{
+		if (team.player[i].captain_flag == TRUE)
+		{
+			kubok_print_student_info(team, i);
+			count_entry = TRUE;
+		}
+		i++;
+	}
+	if (count_entry == FALSE)
+		print_noone();
+	system("pause");
+	menu_kubok();
+}
+
+void subconf_val() // выбор после подтверждения в зависимости от значения текущего
+{
+	switch (sub_count)
+	{
+	case 0:
+		kubok_print_student(Kubok_team);
+		break;
+	case 1:
+		kubok_print_eighteen_year(Kubok_team);
+		break;
+	case 2:
+		kubok_print_GTO_ordet(Kubok_team);
+		break;
+	case 3:
+		kubok_print_captain(Kubok_team);
+		break;
+	case 4:
+		kubok_print_individ(Kubok_team);
+		break;
+	case 5:
+		menu();
+		break;
+	default:
+		break;
+	}
+}
+
+void submenu_choice() // подменю выбора
+{
+	int k1;
+	k1 = _getch(); // получаем символ стрелки без вывода знака
+	if (k1 == 0xE0) // если стрелки
+	{
+		switch (k1)
+		{
+		case 0x48: // стрелка вверх
+			sub_count--;
+			if (sub_count < 0) sub_count = 0;
+			menu_kubok();
+			break;
+
+		case 0x50: // стрелка вниз
+			sub_count++;
+			if (sub_count > 5) sub_count = 5;
+			menu_kubok();
+			break;
+		case 0xD: // подтвердить
+			subconf_val();
+			break;
+		default:
+			submenu_choice();
+		}
+	}
+	switch (k1)
+	{
+	case 0x48: // стрелка вверх
+		sub_count--;
+		if (sub_count < 0) sub_count = 0;
+		menu_kubok();
+		break;
+
+	case 0x50: // стрелка вниз
+		sub_count++;
+		if (sub_count > 5) sub_count = 5;
+		menu_kubok();
+		break;
+	case 0xD: // подтвердить
+		subconf_val();
+		break;
+	default:
+		submenu_choice();
+	}
+}
+
+void menu_kubok() // подменю
+{
+	system("cls"); // очищаем консоль
+
+	if (sub_count == 0)
+	{
+		cout.width(15);
+		cout << right << "__КУБОК ПЕРВОКУРСНИКА__" << endl;
+		SetColor(5, 7);
+		cout << "Все участники кубка" << endl;
+		SetColor(0, 7);
+		cout << "Участники моложе 18 лет" << endl;
+		cout << "Участники со значком ГТО" << endl;
+		cout << "Капитаны команд" << endl;
+		cout << "Капитаны команд, моложе 18 лет со значком ГТО" << endl;
+		cout << "Назад" << endl;
+		submenu_choice();
+	}
+	if (sub_count == 1)
+	{
+		cout.width(15);
+		cout << right << "__КУБОК ПЕРВОКУРСНИКА__" << endl;
+		cout << "Все участники кубка" << endl;
+		SetColor(5, 7);
+		cout << "Участники моложе 18 лет" << endl;
+		SetColor(0, 7);
+		cout << "Участники со значком ГТО" << endl;
+		cout << "Капитаны команд" << endl;
+		cout << "Капитаны команд, моложе 18 лет со значком ГТО" << endl;
+		cout << "Назад" << endl;
+		submenu_choice();
+	}
+	if (sub_count == 2)
+	{
+		cout.width(15);
+		cout << right << "__КУБОК ПЕРВОКУРСНИКА__" << endl;
+		cout << "Все участники кубка" << endl;
+		cout << "Участники моложе 18 лет" << endl;
+		SetColor(5, 7);
+		cout << "Участники со значком ГТО" << endl;
+		SetColor(0, 7);
+		cout << "Капитаны команд" << endl;
+		cout << "Капитаны команд, моложе 18 лет со значком ГТО" << endl;
+		cout << "Назад" << endl;
+		submenu_choice();
+	}
+	if (sub_count == 3)
+	{
+		cout.width(15);
+		cout << right << "__КУБОК ПЕРВОКУРСНИКА__" << endl;
+		cout << "Все участники кубка" << endl;
+		cout << "Участники моложе 18 лет" << endl;
+		cout << "Участники со значком ГТО" << endl;
+		SetColor(5, 7);
+		cout << "Капитаны команд" << endl;
+		SetColor(0, 7);
+		cout << "Капитаны команд, моложе 18 лет со значком ГТО" << endl;
+		cout << "Назад" << endl;
+		submenu_choice();
+	}
+	if (sub_count == 4)
+	{
+		cout.width(15);
+		cout << right << "__КУБОК ПЕРВОКУРСНИКА__" << endl;
+		cout << "Все участники кубка" << endl;
+		cout << "Участники моложе 18 лет" << endl;
+		cout << "Участники со значком ГТО" << endl;
+		cout << "Капитаны команд" << endl;
+		SetColor(5, 7);
+		cout << "Капитаны команд, моложе 18 лет со значком ГТО" << endl;
+		SetColor(0, 7);
+		cout << "Назад" << endl;
+		submenu_choice();
+	}
+	if (sub_count == 5)
+	{
+		cout.width(15);
+		cout << right << "__КУБОК ПЕРВОКУРСНИКА__" << endl;
+		cout << "Все участники кубка" << endl;
+		cout << "Участники моложе 18 лет" << endl;
+		cout << "Участники со значком ГТО" << endl;
+		cout << "Капитаны команд" << endl;
+		cout << "Капитаны команд, моложе 18 лет со значком ГТО" << endl;
+		SetColor(5, 7);
+		cout << "Назад" << endl;
+		SetColor(0, 7);
+		submenu_choice();
+	}
 }
 
 void Check_kubok() // выбор действия после нажатия на "Индивидуальное задание"
@@ -822,7 +1218,7 @@ void Check_kubok() // выбор действия после нажатия на "Индивидуальное задание"
 			kubok_print_student(Kubok_team);
 			break;
 		case '2': // капитаны, моложе 18 лет со значком ГТО
-			kubok_indidid_zad(Kubok_team);
+			kubok_print_captain(Kubok_team);
 			break;
 		case '3':
 			menu();
@@ -871,9 +1267,12 @@ void conf_val() // выбор после подтверждения в зависимости от значения текущего
 		print_group_in_file();
 		break;
 	case 9:
-		Check_kubok();
+		print_student_day();
 		break;
 	case 10:
+		menu_kubok();
+		break;
+	case 11:
 		SetColor(7, 7);
 		exit(0);
 		break;
@@ -901,6 +1300,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Записи студентов по дню создания; Вывод до/после полудня" << endl;
 		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
@@ -920,6 +1320,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Записи студентов по дню создания; Вывод до/после полудня" << endl;
 		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
@@ -939,6 +1340,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Записи студентов по дню создания; Вывод до/после полудня" << endl;
 		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
@@ -958,6 +1360,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Записи студентов по дню создания; Вывод до/после полудня" << endl;
 		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
@@ -977,6 +1380,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Записи студентов по дню создания; Вывод до/после полудня" << endl;
 		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
@@ -996,6 +1400,7 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Записи студентов по дню создания; Вывод до/после полудня" << endl;
 		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
@@ -1015,6 +1420,7 @@ void menu() // меню
 		SetColor(0, 7);
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Записи студентов по дню создания; Вывод до/после полудня" << endl;
 		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
@@ -1034,6 +1440,7 @@ void menu() // меню
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		SetColor(0, 7);
 		cout << "Вывод записей в файл" << endl;
+		cout << "Записи студентов по дню создания; Вывод до/после полудня" << endl;
 		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
@@ -1053,6 +1460,7 @@ void menu() // меню
 		SetColor(5, 7);
 		cout << "Вывод записей в файл" << endl;
 		SetColor(0, 7);
+		cout << "Записи студентов по дню создания; Вывод до/после полудня" << endl;
 		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
@@ -1071,8 +1479,9 @@ void menu() // меню
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
 		SetColor(5, 7);
-		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
+		cout << "Записи студентов по дню создания; Вывод до/после полудня"<<endl;
 		SetColor(0, 7);
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		cout << "Выход" << endl;
 		menu_choice();
 	}
@@ -1089,6 +1498,27 @@ void menu() // меню
 		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
 		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
 		cout << "Вывод записей в файл" << endl;
+		cout << "Записи студентов по дню создания; Вывод до/после полудня" << endl;
+		SetColor(5, 7);
+		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
+		SetColor(0, 7);
+		cout << "Выход" << endl;
+		menu_choice();
+	}
+	if (m_count == 11)
+	{
+		cout.width(15);
+		cout << right << "__МЕНЮ__" << endl;
+		cout << "Создать запись о студенте" << endl;
+		cout << "Внести изменения в существующую запись студента" << endl;
+		cout << "Все записи о студентах" << endl;
+		cout << "Все записи о группе" << endl;
+		cout << "Топ умных студентов по среднему баллу" << endl;
+		cout << "Информация по студентам" << endl;
+		cout << "Студенты без стипендии; учатся на 4; учатся на 5" << endl;
+		cout << "Запись(и) студента(ов) по номеру в журнале" << endl;
+		cout << "Вывод записей в файл" << endl;
+		cout << "Записи студентов по дню создания; Вывод до/после полудня" << endl;
 		cout << "Индивидуальное задание - Кубок первокурсника" << endl;
 		SetColor(5, 7);
 		cout << "Выход" << endl;
@@ -1113,7 +1543,7 @@ void menu_choice() // в зависимости от стрелок изменяем меню
 
 		case 0x50: // стрелка вниз
 			m_count++;
-			if (m_count > 10) m_count = 10;
+			if (m_count > 11) m_count = 11;
 			menu();
 			break;
 		case 0xD: // подтвердить
@@ -1133,7 +1563,7 @@ void menu_choice() // в зависимости от стрелок изменяем меню
 
 	case 0x50: // стрелка вниз
 		m_count++;
-		if (m_count > 10) m_count = 10;
+		if (m_count > 11) m_count = 11;
 		menu();
 		break;
 	case 0xD: // подтвердить
